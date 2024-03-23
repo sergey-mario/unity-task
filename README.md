@@ -61,7 +61,7 @@ NOTE: inside page folder also stored frames as part of page object.
 |-- pageobject/
 |   |-- page1/
 |   |-- page2/
-|-- playwright.config.ts
+|-- playwright.config.js
 |-- package.json
 ```
 
