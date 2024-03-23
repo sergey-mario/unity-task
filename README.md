@@ -59,13 +59,8 @@ NOTE: inside page folder also stored frames as part of page object.
 
 ```
 |-- pageobject/
-|   |-- click-me-page/
-|   |   |-- click-me-frame.ts
-|   |   |-- click-me-page.ts
-|   |-- donation-popup/
-|   |   |-- credit-card-frame.ts
-|   |   |-- credit-card-page.ts
-|   |   |-- ...
+|   |-- page1/
+|   |-- page2/
 |-- playwright.config.ts
 |-- package.json
 ```
