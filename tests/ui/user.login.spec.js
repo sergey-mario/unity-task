@@ -1,24 +1,52 @@
-const {test, expect} = require('../../fixture/app.fixture');
-const {urls, credentials, tags} = require("../../utils/constant");
-const {faker} = require("@faker-js/faker");
+const { test, expect } = require('../../fixture/app.fixture');
+const { urls, credentials, tags } = require('../../utils/constant');
+const { faker } = require('@faker-js/faker');
 
-const {email, password} = credentials;
-const {loginPageUrl, adminPageUrl} = urls;
+const { email, password } = credentials;
+const { loginPageUrl, adminPageUrl } = urls;
 
-test.beforeEach(async ({loginPage}) => {
-    await loginPage.goto();
+test.beforeEach(async ({ app }) => {
+    await app.loginPage.goto();
 });
 
-test('User can login with valid credentials', {tag: tags.UI}, async ({page, loginPage, adminPage}) => {
-    await loginPage.emailInput.fill(email);
-    await loginPage.passwordInput.fill(password);
-    await loginPage.loginButton.click();
-    await expect(page).toHaveURL(adminPageUrl);
-    await expect(await adminPage.getWelcomeHeaderTextContent()).toBe('Welcome, Candidate!');
+test.describe('User login positive flow', async () => {
+    test('User can login with valid credentials', { tag: tags.UI }, async ({ app }) => {
+        await app.loginPage.enterCredentialsAndLogin(email, password);
+        await expect(app.loginPage.page).toHaveURL(adminPageUrl);
+        await expect(await app.adminPage.welcomeHeader.textContent()).toEqual('Welcome, Candidate!');
+    });
 });
 
-test('User see error if login with invalid credentials', {tag: tags.UI}, async ({page, loginPage, adminPage}) => {
-    await loginPage.enterCredentialsAndLogin(faker.internet.email(), faker.internet.password());
-    await expect(page).toHaveURL(loginPageUrl);
-    await expect(await loginPage.unityImage.isVisible()).toBeTruthy;
+test.describe('User login negative flow', async () => {
+    test('User stays on Login page if enter invalid credentials', { tag: tags.UI }, async ({ app }) => {
+        await app.loginPage.enterCredentialsAndLogin(faker.internet.email(), faker.internet.password());
+        await expect(app.loginPage.page).toHaveURL(loginPageUrl);
+        await expect(await app.loginPage.unityImage.isVisible()).toBeTruthy;
+    });
+
+    const dataProvider = [
+        {
+            testTitle: 'credentials as empty string',
+            email: '',
+            password: ''
+        },
+        {
+            testTitle: 'email as empty string',
+            email: '',
+            password: password
+        },
+        {
+            testTitle: 'password as empty string',
+            email: email,
+            password: ''
+        }
+    ];
+
+    for (const { testTitle, email, password } of dataProvider) {
+        test(`User stays on Login page if enter ${testTitle}`, { tag: tags.UI }, async ({ app }) => {
+            await app.loginPage.enterCredentialsAndLogin(email, password);
+            await expect(app.loginPage.page).toHaveURL(loginPageUrl);
+            await expect(await app.loginPage.unityImage.isVisible()).toBeTruthy;
+        });
+    }
 });

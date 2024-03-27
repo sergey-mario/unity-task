@@ -1,37 +1,44 @@
-const {test, expect} = require('../../fixture/app.fixture');
-const {urls, credentials, tags} = require("../../utils/constant");
-const axios = require("axios");
+const { test, expect } = require('../../fixture/app.fixture');
+const { credentials, tags } = require('../../utils/constant');
+const { LoginApi } = require('../../api/LoginApi');
 
-const {email, password} = credentials;
+const validEmail = credentials.email;
+const validPassword = credentials.password;
 
-const dataProvider = [
-    {
-        testTitle: 'credentials as empty string',
-        email: '',
-        password: ''
-    },
-    {
-        testTitle: 'email as empty string',
-        email: '',
-        password
-    },
-    {
-        testTitle: 'password as empty string',
-        email,
-        password: ''
-    },
-]
+let loginApi;
 
-for (const {testTitle, email, password} of dataProvider) {
-    // this test will be failed because it returns 200 status code, but we expect 401 (Unauthorized)
-    test(`User can not login if enter ${testTitle}`, {tag: tags.API}, async () => {
-        const res = await axios.post(`${urls.baseUrl}${urls.loginPageUrl}`,
-            {
-                email,
-                password
-            })
-        expect(res.status).toBe(401);
-    });
-}
+test.beforeAll(async () => {
+    loginApi = new LoginApi();
+});
 
+test.describe('User login negative flow', async () => {
+    const dataProvider = [
+        {
+            testTitle: 'credentials as empty string',
+            email: '',
+            password: ''
+        },
+        {
+            testTitle: 'email as empty string',
+            email: '',
+            password: validPassword
+        },
+        {
+            testTitle: 'password as empty string',
+            email: validEmail,
+            password: ''
+        }
+    ];
 
+    for (const { testTitle, email, password } of dataProvider) {
+        test(`User can not login if enter ${testTitle}`, { tag: tags.API }, async () => {
+            try {
+                await expect(
+                    loginApi.login(email, password)
+                ).rejects.toThrow();
+            } catch (e) {
+                expect(e.message).toBeTruthy();
+            }
+        });
+    }
+});
